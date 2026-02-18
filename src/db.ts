@@ -26,6 +26,8 @@ export type Configuration = {
   lastConnected: Date;
   defaultJoinsound?: string;
   defaultJoinsoundTitle?: string;
+  defaultLeavesound?: string;
+  defaultLeavesoundTitle?: string;
 };
 const configurationSchema = new mongoose.Schema<Configuration>(
   {
@@ -71,6 +73,14 @@ const configurationSchema = new mongoose.Schema<Configuration>(
       required: false,
     },
     defaultJoinsoundTitle: {
+      type: String,
+      required: false,
+    },
+    defaultLeavesound: {
+      type: String,
+      required: false,
+    },
+    defaultLeavesoundTitle: {
       type: String,
       required: false,
     },
@@ -155,6 +165,8 @@ export type User = {
   botusage: number;
   sound?: string;
   soundTitle?: string;
+  leaveSound?: string;
+  leaveSoundTitle?: string;
 };
 const userSchema = new mongoose.Schema<User>(
   {
@@ -175,6 +187,14 @@ const userSchema = new mongoose.Schema<User>(
       required: false,
     },
     soundTitle: {
+      type: String,
+      required: false,
+    },
+    leaveSound: {
+      type: String,
+      required: false,
+    },
+    leaveSoundTitle: {
       type: String,
       required: false,
     },
@@ -231,6 +251,8 @@ export type globalUser = {
   userID: string;
   sound?: string;
   soundTitle?: string;
+  leaveSound?: string;
+  leaveSoundTitle?: string;
 };
 const globalUserSchema = new mongoose.Schema<globalUser>(
   {
@@ -243,6 +265,14 @@ const globalUserSchema = new mongoose.Schema<globalUser>(
       required: false,
     },
     soundTitle: {
+      type: String,
+      required: false,
+    },
+    leaveSound: {
+      type: String,
+      required: false,
+    },
+    leaveSoundTitle: {
       type: String,
       required: false,
     },

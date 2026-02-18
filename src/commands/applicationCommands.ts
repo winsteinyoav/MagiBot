@@ -6,6 +6,7 @@ import { randomfact } from './rfact';
 import { salt } from './salt';
 import { profile } from './profile';
 import { joinsound } from './joinsound';
+import { leavesound } from './leavesound';
 import { info } from './info';
 import { vote } from './vote';
 import { help } from './help';
@@ -24,6 +25,7 @@ export const globalApplicationCommandsForEveryone: {
   salt,
   profile,
   joinsound,
+  leavesound,
   info,
   vote,
   help,

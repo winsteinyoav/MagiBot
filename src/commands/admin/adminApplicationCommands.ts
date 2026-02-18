@@ -7,6 +7,7 @@ import {
 } from '../../types/command';
 import { salt } from './salt';
 import { joinsound } from './joinsound';
+import { leavesound } from './leavesound';
 import { config } from './config';
 import { adminDeferralType } from '../../shared_assets';
 
@@ -25,6 +26,7 @@ export const adminApplicationCommands: {
 } = {
   salt,
   joinsound,
+  leavesound,
   config,
 };
 

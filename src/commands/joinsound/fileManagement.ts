@@ -14,6 +14,8 @@ type JoinsoundTarget =
   | { userId: string; guildId?: undefined; default: true }
   | { userId?: undefined; guildId: string; default: true };
 
+export type SoundType = 'join' | 'leave';
+
 // eslint-disable-next-line no-shadow
 export const enum JoinsoundStoreError {
   noStorageLeftOnServer = 0x1000,
@@ -120,20 +122,21 @@ async function spaceUserHasLeft(
   return sizeLimit - (sizeOfFolder - sizeOfExistingFile);
 }
 
-function getFilename(target: JoinsoundTarget) {
-  const title = target.default ? 'default' : `${guildPrefix}${target.guildId}`;
+function getFilename(target: JoinsoundTarget, soundType: SoundType = 'join') {
+  const base = target.default ? 'default' : `${guildPrefix}${target.guildId}`;
+  const title = soundType === 'leave' ? `leave_${base}` : base;
   return Path.join(getTargetPath(target), title);
 }
 
 export async function storeJoinsoundOfTarget(
   target: JoinsoundTarget,
   fileUrl: string,
+  soundType: SoundType = 'join',
 ) {
   if (!(await doesServerHaveEnoughSpace())) {
-    // this should not happen. but if it does, we handle it to stop the server from being overloaded
     return JoinsoundStoreError.noStorageLeftOnServer;
   }
-  const filename = getFilename(target);
+  const filename = getFilename(target, soundType);
   const spaceLeftForUser = await spaceUserHasLeft(target, filename);
   const success = await downloadFile(fileUrl, filename, spaceLeftForUser);
   if (!success) {
@@ -146,8 +149,9 @@ export async function storeJoinsoundOfTarget(
 
 export async function removeLocallyStoredJoinsoundOfTarget(
   target: JoinsoundTarget,
+  soundType: SoundType = 'join',
 ) {
-  const filename = getFilename(target);
+  const filename = getFilename(target, soundType);
   await unlink(filename).catch(gracefullyCatchENOENT);
 }
 
@@ -161,34 +165,40 @@ async function getExistingUserFolders() {
 }
 
 export async function removeLocallyStoredJoinsoundsOfGuild(guildId: string) {
-  // remove default server sound
-  await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true });
+  await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true }, 'join');
+  await removeLocallyStoredJoinsoundOfTarget({ guildId, default: true }, 'leave');
 
-  // remove server folder
   await rmdir(Path.join(basePath, `${guildPrefix}${guildId}`)).catch(
     gracefullyCatchENOENT,
   );
 
-  // remove sounds of all users in server
   const userIds = await getExistingUserFolders();
   await asyncForEach(userIds, async (userId) => {
-    await removeLocallyStoredJoinsoundOfTarget({ userId, guildId });
+    await removeLocallyStoredJoinsoundOfTarget({ userId, guildId }, 'join');
+    await removeLocallyStoredJoinsoundOfTarget({ userId, guildId }, 'leave');
   });
 }
 
-async function getExistingSoundFilesOfUser(userId: string) {
+const leaveGuildPrefix = `leave_${guildPrefix}`;
+
+async function getExistingSoundFilesOfUser(userId: string, soundType: SoundType = 'join') {
   const files = await readdir(getTargetPath({ userId, default: true }), {
     withFileTypes: true,
   });
+  const prefix = soundType === 'leave' ? leaveGuildPrefix : guildPrefix;
   return files
-    .filter((file) => file.isFile() && file.name.startsWith(guildPrefix))
-    .map((file) => file.name.substring(guildPrefix.length));
+    .filter((file) => file.isFile() && file.name.startsWith(prefix))
+    .map((file) => file.name.substring(prefix.length));
 }
 
 export async function getAllLocallyStoredJoinsoundsOfUser(userId: string) {
-  return getExistingSoundFilesOfUser(userId);
+  return getExistingSoundFilesOfUser(userId, 'join');
 }
 
-export function getJoinsoundReadableStreamOfUser(target: JoinsoundTarget) {
-  return createReadStream(getFilename(target));
+export async function getAllLocallyStoredLeavesoundsOfUser(userId: string) {
+  return getExistingSoundFilesOfUser(userId, 'leave');
+}
+
+export function getJoinsoundReadableStreamOfUser(target: JoinsoundTarget, soundType: SoundType = 'join') {
+  return createReadStream(getFilename(target, soundType));
 }

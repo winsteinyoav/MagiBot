@@ -67,6 +67,17 @@ export async function removeAllJoinsoundsOfUserFromDb(userId: string) {
   );
 }
 
+export async function removeAllLeavesoundsOfUserFromDb(userId: string) {
+  await UserModel.updateMany(
+    { userID: userId },
+    { $unset: { leaveSound: 1, leaveSoundTitle: 1 } },
+  );
+  await GlobalUserDataModel.updateMany(
+    { userID: userId },
+    { $unset: { leaveSound: 1, leaveSoundTitle: 1 } },
+  );
+}
+
 async function createFirstConfiguration(guildID: string) {
   const configuration = new ConfigurationModel({
     _id: guildID,
