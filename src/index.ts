@@ -13,9 +13,6 @@ const manager = new ShardingManager('dist/bot.js', {
   token: TOKEN,
 });
 
-if (!process.env.STATCORD_TOKEN) {
-  throw new Error('Statcord token missing!');
-}
 
 /* export const statcord = new Statcord.ShardingClient({
   manager,
