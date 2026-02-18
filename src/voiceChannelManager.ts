@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import {
   AudioPlayer,
   AudioPlayerStatus,
@@ -45,7 +46,7 @@ function clearConnectionAndPlayer(
 
 function playSoundInChannel(
   // eslint-disable-next-line no-shadow
-  sound: string | NodeJS.ReadableStream,
+  sound: string | Readable,
   channel: VoiceBasedChannel,
   guild: Guild,
 ) {
